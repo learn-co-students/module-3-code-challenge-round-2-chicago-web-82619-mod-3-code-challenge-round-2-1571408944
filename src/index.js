@@ -2,9 +2,11 @@ BEER_URL = 'http://localhost:3000/beers';
 
 //Since we're using DOM Manipulation, we'll want to load
 //the page before running any js
-document.addEventListener('DOMContentLoaded', function(){
-    fetchBeers();
-})
+function main(){
+    document.addEventListener('DOMContentLoaded', function(){
+        fetchBeers();
+    })
+}
 
 function fetchBeers(){
     //will fetch all beers from above URL
@@ -34,8 +36,8 @@ function renderBeer(beer){
     li.addEventListener('click', function(){
         fetch(`${BEER_URL}/${beer.id}`)
         .then(res => res.json())
-        .then(data => showBeerDetails(data))
         //passes the currently selected beer to show details function
+        .then(data => showBeerDetails(data))
     })
     //append each li item to the ul
     beerList.append(li);
@@ -54,24 +56,55 @@ function showBeerDetails(beer){
     beerImg.src = beer.image_url;
     let beerTag = document.createElement('h3');
     beerTag.innerHTML = beer.tagline;
-    let beerDesc = document.createElement('textarea');
-    beerDesc.innerHTML = beer.description;
+
+    //initially, display the beer description as just a paragraph
+    //when edit is clicked, we'll change this area to an editable text area
+    let beerDescDisplay = document.createElement('p');
+    beerDescDisplay.innerHTML = beer.description;
+
+    //create and style button
     let editBtn = document.createElement('button');
     editBtn.setAttribute('id', 'edit-beer');
     editBtn.setAttribute('class', 'btn btn-info');
-    editBtn.innerHTML = 'Save';
-    //when used clicks, we should persist the change
-    editBtn.addEventListener('click', function(){
-        //this passes the current beer to the save function
+    //button initially says "Edit" to prompt the user to edit the beer description
+    editBtn.innerHTML = 'Edit';
+
+    //add functionality to the button
+    editBtn.addEventListener('click', event => {
+
+        //if the button currently says "Edit", the beer description is still
+        //read-only and we must make it a textarea
+        if(event.target.innerHTML == 'Edit'){
+
+            //create a new text area the user can edit
+            let beerDescEdit = document.createElement('textarea');
+            beerDescEdit.innerHTML = beer.description;
+            //to "change" the paragraph to an editable textarea,
+            //simply remove the entire paragraph area as well as
+            //the button so we can immediately re-append it in order
+            beerDetails.removeChild(beerDescDisplay, editBtn);
+
+            //append the new textarea as well as the button
+            beerDetails.append(beerDescEdit, editBtn);
+
+            //because the description is now in a textarea that can be edited,
+            //the button should read "Save" to let the user know they can save rather than "Edit"
+            editBtn.innerHTML = 'Save';
+        } else {
+        //if the button doesnt say "Edit", assume it says "Save" and pass
+        //the beer info to the save method to be patched
         saveBeer(beer);
+        }
     })
+
     //append all of the html elements into their parent div
-    beerDetails.append(beerName, beerImg, beerTag, beerDesc, editBtn);
+    beerDetails.append(beerName, beerImg, beerTag, beerDescDisplay, editBtn);
 }
 
 function saveBeer(beer){
     //grab the textarea value where the beer description is
     let newDesc = document.querySelector('textarea').value;
+
     //patch request with an interpolated URL
     fetch(`${BEER_URL}/${beer.id}`, {
         method: 'PATCH',
@@ -93,7 +126,15 @@ function saveBeer(beer){
         //selects another beer and then this one the new description 
         //will still be here
         showBeerDetails(data);
+
+        //grab the "Save" button and change it to edit, since
+        //the beer has now been persisted and the user can be 
+        //prompted to "Edit" again if they so choose
+        let saveBtn = document.getElementById('edit-beer');
+        saveBtn.innerHTML = 'Edit';
     })
-    //error catching
+    //error handling
     .catch(error => console.error(error))
 }
+
+main()
