@@ -24,13 +24,15 @@ class Beer {
     }
 
     renderDetail() {
-    return `<h1>${this.name}</h1>
-<img src="${this.imageUrl}">
-<h3>${this.tagline}</h3>
-<textarea>${this.description}</textarea>
-<button id="edit-beer" data-id="${this.id}" class="btn btn-info">
-  Save
-</button>`
+    return `
+    <h1>${this.name}</h1>
+    <img src="${this.imageUrl}">
+    <h3>${this.tagline}</h3>
+    <textarea>${this.description}</textarea>
+    <button id="edit-beer" data-id="${this.id}" class="btn btn-info">
+      Save
+    </button>
+    `
     }
 
 }

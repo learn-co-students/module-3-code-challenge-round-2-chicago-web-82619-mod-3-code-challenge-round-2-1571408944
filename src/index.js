@@ -32,14 +32,18 @@ async function updateBeer(event) {
 
 
 async function showBeerDetails(event) {
-
+  let previousNode = document.querySelector('li.active')
+  if (!!previousNode) {
+    previousNode.classList.remove('active')
+  }
+  event.target.classList.add("active")
   let id = event.target.dataset.id
   let resp = await fetch(`http://localhost:3000/beers/${id}`)
   let beerData = await resp.json()
   let beer = new Beer(beerData)
   console.log(beer)
-  beerDiv.innerHTML = ""
-  beerDiv.innerHTML += beer.renderDetail()
+
+  beerDiv.innerHTML = beer.renderDetail()
 
 
 }
